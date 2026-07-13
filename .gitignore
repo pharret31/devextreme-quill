@@ -1,5 +1,6 @@
-/dist
-/node_modules
+dist
+tools/make-sbom/pack
+node_modules
 *.tgz
 *.zip
 /selenium
