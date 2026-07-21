@@ -405,16 +405,18 @@ class Keyboard extends Module {
 }
 
 Keyboard.DEFAULTS = {
+  inlineTabInsertion: true,
   bindings: {
     bold: makeFormatHandler('bold', 66),
     italic: makeFormatHandler('italic', 73),
     underline: makeFormatHandler('underline', 85),
     indent: {
-      // highlight tab or tab at beginning of list, indent or blockquote
       key: 'tab',
       format: ['blockquote', 'indent', 'list'],
       handler(range, context) {
-        if (context.collapsed && context.offset !== 0) return true;
+        if (this.options.inlineTabInsertion && context.collapsed && context.offset !== 0) {
+          return true;
+        }
         this.quill.format('indent', '+1', Quill.sources.USER);
         return false;
       },
@@ -423,9 +425,10 @@ Keyboard.DEFAULTS = {
       key: 'tab',
       shiftKey: true,
       format: ['blockquote', 'indent', 'list'],
-      // highlight tab or tab at beginning of list, indent or blockquote
       handler(range, context) {
-        if (context.collapsed && context.offset !== 0) return true;
+        if (this.options.inlineTabInsertion && context.collapsed && context.offset !== 0) {
+          return true;
+        }
         this.quill.format('indent', '-1', Quill.sources.USER);
         return false;
       },
@@ -460,9 +463,11 @@ Keyboard.DEFAULTS = {
     },
     tab: {
       key: 'tab',
-      handler(range, { format }) {
+      handler(range, context) {
+        if (!this.options.inlineTabInsertion) return true;
+        const { format } = context;
         const isInTable = format.tableCellLine || format.tableHeaderCellLine
-        || format.tableHeaderCell || format.table;
+          || format.tableHeaderCell || format.table;
         if (isInTable) return true;
         this.quill.history.cutoff();
         const delta = new Delta()
